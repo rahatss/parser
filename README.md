@@ -35,7 +35,10 @@ parser_fmts/
 │       ├──── txt.rs
 │       ├──── bin.rs
 │       └── tests/
-│           └── roundtrip.rs
+│           └── mod.rs
+            └── bin.rs
+            └── csv.rs
+            └── text.rs
 └── cli/
     ├── Cargo.toml
     └── src/
@@ -49,7 +52,7 @@ parser_fmts/
 Конвертация данных между форматами.
 Пример использования
 ```
-cargo run -p ypbank_cli -- \
+cargo run -p cli -- \
   --input data.csv \
   --input-format csv \
   --output-format txt \
@@ -63,7 +66,7 @@ cargo run -p ypbank_cli -- \
 
 Пример использования
 ```
-cargo run -p ypbank_cli --bin comparer -- \
+cargo run -p cli --bin comparer -- \
 --file1 data.bin --format1 bin \
 --file2 data.csv --format2 csv
 ```
