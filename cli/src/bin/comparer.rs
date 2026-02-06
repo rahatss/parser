@@ -27,13 +27,13 @@ fn main() -> Result<(), Box<dyn Error>> {
     let file2 = file2.ok_or("Missing --file2")?;
     let format2 = format2.ok_or("Missing --format2")?;
 
-    let a = read(file1, format1.as_str())?;
-    let b = read(file2, format2.as_str())?;
+    let a = read(&file1, format1.as_str())?;
+    let b = read(&file2, format2.as_str())?;
 
     for (tx1, tx2) in a.iter().zip(b) {
         if *tx1 != tx2 {
             println!("Mismatch tx, [{}] vs [{}]", *tx1, tx2);
-            break;
+            return Ok(());
         }
     }
 
@@ -41,13 +41,18 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn read(path: String, format: &str) -> Result<Vec<Transaction>, ParserError> {
-    let file = File::open(path).map_err(|err| ParserError::Io(err))?;
+fn read(path: &str, format: &str) -> Result<Vec<Transaction>, ParserError> {
+    let file = File::open(path).map_err(|err| {
+        ParserError::Invalid(format!(
+            "Failed to open input file '{}' (provided via --input): {}",
+            &path, err
+        ))
+    })?;
 
     match format {
         "csv" => Ok(csv::Csv::read(file)?),
-        "txt" => Ok(binary::BinParser::read(file)?),
-        "bin" => Ok(txt::TxtParser::read(file)?),
+        "txt" => Ok(txt::TxtParser::read(file)?),
+        "bin" => Ok(binary::BinParser::read(file)?),
         _ => Err(ParserError::Invalid(format!("Unknown format: {}", format))),
     }
 }
