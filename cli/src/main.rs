@@ -1,4 +1,4 @@
-use parser::{Format, binary, csv, txt};
+use parser::{Format, ParserError, binary, csv, txt};
 use std::{env, fs::File, io::stdout};
 
 fn main() {
@@ -21,7 +21,14 @@ fn main() {
     let input_format = input_format.expect("Missing --input-format");
     let output_format = output_format.expect("Missing --output-format");
 
-    let input = File::open(input_file).expect("failed to open file");
+    let input = File::open(input_file.clone())
+        .map_err(|err| {
+            ParserError::Invalid(format!(
+                "Failed to open input file '{}' (provided via --input): {}",
+                input_file, err
+            ))
+        })
+        .unwrap();
 
     let transactions = match input_format.as_str() {
         "bin" => binary::BinParser::read(input),

@@ -1,10 +1,43 @@
+//! Бинарный формат парсинга транзакций.
+//!
+//! Формат использует little-endian кодирование чисел и следующую структуру:
+//!
+//! ```text
+//! u32  — количество транзакций
+//!
+//! для каждой транзакции:
+//! u64  — id
+//! i64  — amount
+//! u32  — длина account
+//! [u8] — account (UTF-8)
+//! u32  — длина currency
+//! [u8] — currency (UTF-8)
+//! ```
+
 use std::io::{Read, Write};
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use crate::{Format, models::Transaction, errors::ParserError};
 
+/// Парсер бинарного формата транзакций.
+///
+/// Реализует трейт [`Format`] и позволяет читать и записывать
+/// транзакции в компактном бинарном виде.
+///
+/// Используется для быстрого обмена данными и минимального размера файлов.
 pub struct BinParser;
 
 impl Format for BinParser {
+    /// Считывает список транзакций из бинарного потока.
+    ///
+    /// # Формат входных данных
+    /// См. документацию модуля.
+    ///
+    /// # Ошибки
+    ///
+    /// Возвращает [`ParserError::Io`], если:
+    /// - поток содержит недостаточно данных;
+    /// - произошла ошибка чтения;
+    /// - данные имеют некорректную структуру.
     fn read<R: Read>(mut reader: R) -> Result<Vec<Transaction>, ParserError> {
         let count = reader.read_u32::<LittleEndian>().map_err(|err| ParserError::Io(err))?;
         let mut transactions = Vec::with_capacity(count as usize);
@@ -26,6 +59,14 @@ impl Format for BinParser {
         Ok(transactions)
     }
 
+    /// Записывает список транзакций в бинарный поток.
+    ///
+    /// # А
+    /// См. документацию модуля.
+    ///
+    /// # Ошибки
+    ///
+    /// Возвращает [`ParserError::Io`], если произошла ошибка записи.
     fn write<W: Write>(mut writer: W, transactions: &[Transaction]) -> Result<(), ParserError> {
         writer.write_u32::<LittleEndian>(transactions.len() as u32).map_err(|err| ParserError::Io(err))?;
 

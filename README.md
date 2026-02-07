@@ -36,9 +36,9 @@ parser_fmts/
 │       ├──── bin.rs
 │       └── tests/
 │           └── mod.rs
-            └── bin.rs
-            └── csv.rs
-            └── text.rs
+│           └── bin.rs
+│           └── csv.rs
+│           └── text.rs
 └── cli/
     ├── Cargo.toml
     └── src/
@@ -51,12 +51,17 @@ parser_fmts/
 ### CLI Converter
 Конвертация данных между форматами.
 Пример использования
+
 ```
-cargo run -p cli -- \
-  --input data.csv \
+cd cli
+```
+
+```
+ cargo run --bin cli -- \
+  --input ../examples/transactions.csv \
   --input-format csv \
-  --output-format txt \
-  > output.txt
+  --output-format bin \
+  > ../examples/transactions.bin
 ```
 Поддерживаемые форматы: csv, txt, bin
 
@@ -65,10 +70,17 @@ cargo run -p cli -- \
 Сравнение двух файлов с транзакциями в любых форматах.
 
 Пример использования
+
 ```
-cargo run -p cli --bin comparer -- \
---file1 data.bin --format1 bin \
---file2 data.csv --format2 csv
+cd cli
+```
+
+```
+cargo run --bin comparer -- \
+  --file1 ../examples/transactions.csv \
+  --format1 csv \
+  --file2 ../examples/transactions.txt \
+  --format2 txt
 ```
 
 ### Тесты
